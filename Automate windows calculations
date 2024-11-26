@@ -1,23 +1,31 @@
 from robocorp.tasks import task
 from robocorp import windows
 import time
+
 desktop=windows.Desktop()
 
 @task
-def automate_calc():
+def automate_calc_notepad():
     calc=open_calc()
-    do_calculation(calc)
-    copy_result(calc)
-    close_calc()
-    
+    npad=open_notepad()
+    operation=['34+6=', '87+6=', '12+45=']
+    for op in operation:
+        do_calculation(calc, op)
+        print('did calc')
+        copy_result(calc)
+        paste_result(npad)
 
 def open_calc():
     desktop.windows_run(f'calc.exe')
-    calc=windows.find_windows('name:Calculator')
-    return (calc[0])
+    calc=windows.find_window('name:Calculator')
+    print(calc)
+    if type(calc) is list:
+        calc=calc[0]
+    calc.set_window_pos(0, 0, desktop.width / 2, desktop.height)
+    return calc
 
-def do_calculation(calc):
-    calc.send_keys(keys='27+7=')
+def do_calculation(calc, oper):
+    calc.send_keys(keys=oper)
 
 def copy_result(calc):
     calc.send_keys('{CTRL}c')
@@ -25,5 +33,17 @@ def copy_result(calc):
 def close_calc():
     time.sleep(10) 
     desktop.close_windows("name:Calculator")
+
+def open_notepad():
+    desktop.windows_run(f'notepad.exe')
+    npad=windows.find_window('regex:.*Notepad')
+    print(npad)
+    return npad
+
+def paste_result(application):
+    application.send_keys('{CTRL}v')
+    application.send_keys('{ENTER}')
+
+#Note: First using conda.yaml for - robocorp-windows==1.0.4     # https://pypi.org/project/robocorp-windows
 
 #Note: First using conda for - robocorp-windows==1.0.4     # https://pypi.org/project/robocorp-windows
