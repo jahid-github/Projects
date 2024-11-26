@@ -1,0 +1,29 @@
+from robocorp.tasks import task
+from robocorp import windows
+import time
+desktop=windows.Desktop()
+
+@task
+def automate_calc():
+    calc=open_calc()
+    do_calculation(calc)
+    copy_result(calc)
+    close_calc()
+    
+
+def open_calc():
+    desktop.windows_run(f'calc.exe')
+    calc=windows.find_windows('name:Calculator')
+    return (calc[0])
+
+def do_calculation(calc):
+    calc.send_keys(keys='27+7=')
+
+def copy_result(calc):
+    calc.send_keys('{CTRL}c')
+
+def close_calc():
+    time.sleep(10) 
+    desktop.close_windows("name:Calculator")
+
+#Note: First using conda for - robocorp-windows==1.0.4     # https://pypi.org/project/robocorp-windows
