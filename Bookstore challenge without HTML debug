@@ -1,0 +1,57 @@
+from robocorp.tasks import task
+from robocorp import browser
+
+from RPA.Excel.Files import Files
+
+@task
+def bookstore_python():
+    """
+    Open the bookstore website
+    Collect the title and prices of all books
+    Save this information in an Excel file
+    """
+    browser.configure(
+        slowmo=50,
+    )
+    open_website()
+    titles, prices = collect_book_data()
+    fill_excel_worksheet(titles, prices)
+
+def find_largest(list_strings):
+    if type(list_strings) is not list:
+        print('Error. Should receive a list')
+        return None
+    largest=len(list_strings[0])
+    for item in list_strings:
+        size=len(item)
+        if size>largest:
+            largest=size
+    return largest
+
+def open_website():
+    """Navigates to the given URL"""
+    browser.goto("https://fspacheco.github.io/rpa-challenge/kirjakauppa.html")
+
+def collect_book_data():
+    """Collects the title and price for all books"""
+    page = browser.page()
+
+    titles=page.locator("div.book-title").all_text_contents()
+    prices_text=page.locator("div.book-price").all_text_contents()
+
+    prices=[]
+    for p in prices_text:
+        prices.append(float(p.replace('$','')))
+    return titles, prices
+
+def fill_excel_worksheet(titles, prices):
+    """Save data to excel"""
+    excel = Files()
+    excel.create_workbook("bookstore.xlsx", sheet_name='books')
+    excel.append_rows_to_worksheet([('Title', 'Price')])
+
+    for idx,t in enumerate(titles):
+        excel.append_rows_to_worksheet([(t, prices[idx])])
+    excel.auto_size_columns("A", width=find_largest(titles))
+    excel.save_workbook()
+    excel.close_workbook()
