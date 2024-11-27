@@ -55,3 +55,92 @@ def fill_excel_worksheet(titles, prices):
     excel.auto_size_columns("A", width=find_largest(titles))
     excel.save_workbook()
     excel.close_workbook()
+
+
+
+
+
+
+from robocorp.tasks import task
+from robocorp import browser
+from RPA.Excel.Files import Files
+
+@task
+def bookstore_tests():
+    """Run tests for the bookstore website"""
+    browser.configure(
+        slowmo=100,
+    )
+    open_website()
+    test_add_to_cart()
+    test_sort_by_price()
+    test_search_function()
+
+def open_website():
+    """Navigates to the given URL"""
+    browser.goto("https://fspacheco.github.io/rpa-challenge/kirjakauppa.html")
+
+
+def test_add_to_cart():
+    """Test adding an item to the cart"""
+    page = browser.page()
+    add_to_cart_buttons = page.locator("button.lisaa-ostoskoriin").first
+    add_to_cart_buttons.click()
+    
+    cart_count = page.locator("span.cart-count").text_content()
+    if cart_count != 1:
+        print(f"Expected cart count to be 1, but got {cart_count}")
+    else:
+        print("Test Passed")
+    
+'''
+    assert cart_count == "", f"Expected cart count to be 1, but got {cart_count}"
+
+    # Optionally, we can print the print the result or log out
+    print("Cart updated successfully.")
+'''
+
+
+# Code for checking the pricelist 
+
+def test_sort_by_price():
+    """Test sorting items by price"""
+    page = browser.page()
+    
+
+    prices = page.locator("span.hinta").all_text_contents()
+    prices = [float(price.replace("$", "")) for price in prices]
+    sorted_prices = sorted(prices)
+
+    if prices == sorted_prices:
+        print("Prices are not sorted Correctly")
+    else:
+        print("Test Passed")
+
+ 
+'''
+  assert prices == sorted_prices, "The prices are not sorted correctly."
+'''
+
+# Test the search button
+def test_search_function():
+    """Test searching for an item"""
+    page = browser.page()
+    search_term = "RPA in Practice"
+   
+    # Collect all search results
+    results = page.locator("div.kirjan-nimi").all_text_contents()
+    
+    # Check if the search term is present in all results
+    if all(search_term.lower() in result.lower() for result in results):
+        print("Correct")
+    else:
+        print("The details you entered for search do not match")
+
+# Call the test function to run the tests
+test_search_function()
+```
+
+# Output of the Task 4 which is shown by the given image.
+  ![Test](img/Test_Automation_Image.jpg)
+  ![Login](img/Login_Page_Image.jpg)
